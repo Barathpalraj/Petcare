@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Treatment Plans & Regimens{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-procedures" style="color: var(--primary);"></i> Treatment Plans & Post-Care</h1>
+    <p>Monitoring active therapeutic regimes, wound dressings, dietary protocols, and scheduled follow-up timelines</p>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search treatments, dietary notes, or patients..." class="table-search-input" data-table-id="treatmentTable">
+    </div>
+  </div>
+
+  {% if records %}
+  <div class="table-responsive">
+    <table class="custom-table" id="treatmentTable">
+      <thead>
+        <tr>
+          <th>Date Initiated</th>
+          <th>Patient</th>
+          <th>Diagnosis</th>
+          <th>Therapeutic Regimen / Plan</th>
+          <th>Dietary Protocol</th>
+          <th>Follow-Up Due</th>
+          <th>Veterinarian</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td><strong>{{ r.record_date }}</strong></td>
+          <td>
+            <a href="{{ url_for('pet_details', id=r.pet_id) }}" style="font-weight: 700; color: var(--primary);">
+              {{ r.pet_name }}
+            </a>
+          </td>
+          <td><span class="badge badge-warning">{{ r.diagnosis }}</span></td>
+          <td style="max-width: 280px; white-space: normal; font-size: 0.85rem;">{{ r.treatment_plan }}</td>
+          <td>{{ r.dietary_notes or 'Standard Diet' }}</td>
+          <td>
+            {% if r.follow_up_date %}
+            <span class="badge badge-info"><i class="fas fa-calendar-alt"></i> {{ r.follow_up_date }}</span>
+            {% else %}
+            <span style="color: var(--text-muted); font-size: 0.8rem;">As needed</span>
+            {% endif %}
+          </td>
+          <td>{{ r.doctor_name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-procedures"></i>
+    <h4>No Active Treatment Plans</h4>
+    <p>Treatment directives issued during consultations will be cataloged here.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

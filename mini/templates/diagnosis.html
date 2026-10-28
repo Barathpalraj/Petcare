@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Diagnoses Registry{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-diagnoses" style="color: var(--primary);"></i> Clinical Diagnoses Index</h1>
+    <p>Chronological registry of confirmed veterinary conditions and pathology findings</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('consultation') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> New Consultation
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Filter diagnoses, symptoms, or patients..." class="table-search-input" data-table-id="diagnosisTable">
+    </div>
+  </div>
+
+  {% if records %}
+  <div class="table-responsive">
+    <table class="custom-table" id="diagnosisTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Patient</th>
+          <th>Species</th>
+          <th>Primary Diagnosis</th>
+          <th>Symptoms Observed</th>
+          <th>Attending Vet</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td><strong>{{ r.record_date }}</strong></td>
+          <td>
+            <a href="{{ url_for('pet_details', id=r.pet_id) }}" style="font-weight: 700; color: var(--primary);">
+              {{ r.pet_name }}
+            </a>
+          </td>
+          <td><span class="badge badge-secondary">{{ r.species }}</span></td>
+          <td><span class="badge badge-warning" style="font-size: 0.85rem;">{{ r.diagnosis }}</span></td>
+          <td style="max-width: 240px; white-space: normal; font-size: 0.85rem;">{{ r.symptoms }}</td>
+          <td>{{ r.doctor_name }}</td>
+          <td>
+            <a href="{{ url_for('pet_details', id=r.pet_id) }}" class="action-btn" title="View Patient Chart">
+              <i class="fas fa-notes-medical"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-diagnoses"></i>
+    <h4>No Diagnoses Logged</h4>
+    <p>Recorded clinical examination outcomes will appear here.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

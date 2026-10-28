@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Client Payment Records & Cash Journal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-credit-card" style="color: var(--primary);"></i> Payment Transactions Journal</h1>
+    <p>Financial audit ledger of cash, credit card, bank transfer, and insurance payouts received</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('bills') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-file-invoice"></i> All Invoices
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search payment transactions or client..." class="table-search-input" data-table-id="paymentsTable">
+    </div>
+  </div>
+
+  {% if payments %}
+  <div class="table-responsive">
+    <table class="custom-table" id="paymentsTable">
+      <thead>
+        <tr>
+          <th>Transaction Date</th>
+          <th>Invoice #</th>
+          <th>Client Name</th>
+          <th>Patient Pet</th>
+          <th>Payment Method</th>
+          <th>Reference #</th>
+          <th>Amount Settled</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td><strong>{{ p.payment_date }}</strong></td>
+          <td><code>{{ p.invoice_number }}</code></td>
+          <td>{{ p.owner_name }}</td>
+          <td>{{ p.pet_name }}</td>
+          <td>
+            <span class="badge badge-info">{{ p.payment_method.title() }}</span>
+          </td>
+          <td><code>{{ p.transaction_ref or '-' }}</code></td>
+          <td><strong style="color: var(--success); font-size: 1.05rem;">₹{{ "%.2f"|format(p.amount) }}</strong></td>
+          <td>
+            <a href="{{ url_for('invoice_details', id=p.invoice_id) }}" class="action-btn" title="View Statement">
+              <i class="fas fa-receipt"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-credit-card"></i>
+    <h4>No Payments Logged</h4>
+    <p>Recorded client transactions will populate this financial ledger.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Consultation Workspace{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-stethoscope" style="color: var(--primary);"></i> Doctor Clinical Workspace</h1>
+    <p>Welcome back, {{ current_user.full_name }}! You have {{ pending_count }} scheduled patient visits today.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('consultation') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-notes-medical"></i> Active Consultations
+    </a>
+    <a href="{{ url_for('prescriptions') }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-prescription"></i> Prescriptions
+    </a>
+  </div>
+</div>
+
+<div class="dashboard-row">
+  <!-- Left Column: Today's Clinical Queue -->
+  <div>
+    <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-user-clock" style="color: var(--primary);"></i> Your Patients for Today ({{ today_date }})</h3>
+        <span class="badge badge-info">{{ appointments|length }} Patients Scheduled</span>
+      </div>
+
+      {% if appointments %}
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Patient</th>
+              <th>Species & Breed</th>
+              <th>Owner & Contact</th>
+              <th>Reason / Symptoms</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in appointments %}
+            <tr>
+              <td><strong>{{ appt.appointment_time }}</strong></td>
+              <td>
+                <div class="table-user-cell">
+                  <div class="table-avatar"><i class="fas fa-paw"></i></div>
+                  <div class="table-user-info">
+                    <span class="name">{{ appt.pet_name }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ appt.species }} ({{ appt.breed or 'Mixed' }})</td>
+              <td>
+                <div>{{ appt.owner_name }}</div>
+                <div style="font-size: 0.775rem; color: var(--text-muted);">{{ appt.owner_phone }}</div>
+              </td>
+              <td style="max-width: 220px; white-space: normal;">
+                <span style="font-size: 0.85rem;">{{ appt.reason }}</span>
+              </td>
+              <td>
+                <span class="badge badge-{{ appt.status }}">{{ appt.status.replace('_', ' ') }}</span>
+              </td>
+              <td>
+                {% if appt.status in ['scheduled', 'in_progress'] %}
+                <a href="{{ url_for('add_consultation', appointment_id=appt.id) }}" class="btn btn-primary btn-sm" title="Begin Consultation">
+                  <i class="fas fa-stethoscope"></i> Consult
+                </a>
+                {% else %}
+                <a href="{{ url_for('appointment_details', id=appt.id) }}" class="action-btn" title="View details">
+                  <i class="fas fa-eye"></i>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-calendar-check"></i>
+        <h4>No Patient Queue Today</h4>
+        <p>You have no scheduled clinical consultations right now.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Clinical Consultations Handled -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-history" style="color: var(--secondary);"></i> Your Recent Medical Summaries</h3>
+        <a href="{{ url_for('medical_records') }}">All Records <i class="fas fa-chevron-right"></i></a>
+      </div>
+
+      {% if recent_records %}
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Patient</th>
+              <th>Diagnosis</th>
+              <th>Treatment Plan</th>
+              <th>Follow-up</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for rec in recent_records %}
+            <tr>
+              <td><strong>{{ rec.record_date }}</strong></td>
+              <td>
+                <span class="font-bold">{{ rec.pet_name }}</span>
+                <span class="badge badge-info" style="font-size: 0.7rem; margin-left: 0.25rem;">{{ rec.species }}</span>
+              </td>
+              <td><span class="badge badge-warning">{{ rec.diagnosis }}</span></td>
+              <td style="max-width: 240px; white-space: normal; font-size: 0.85rem;">
+                {{ rec.treatment_plan }}
+              </td>
+              <td>{{ rec.follow_up_date or 'None' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Column: Quick Doctor Actions & Clinical Tools -->
+  <div>
+    <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-toolbox" style="color: var(--primary);"></i> Clinical Tools</h3>
+      </div>
+      <div class="quick-actions-grid">
+        <a href="{{ url_for('consultation') }}" class="quick-action-item">
+          <i class="fas fa-stethoscope"></i>
+          <span>Consultation</span>
+        </a>
+        <a href="{{ url_for('prescriptions') }}" class="quick-action-item">
+          <i class="fas fa-prescription-bottle-alt"></i>
+          <span>Write Rx</span>
+        </a>
+        <a href="{{ url_for('vaccinations') }}" class="quick-action-item">
+          <i class="fas fa-syringe"></i>
+          <span>Log Vaccine</span>
+        </a>
+        <a href="{{ url_for('medicines') }}" class="quick-action-item">
+          <i class="fas fa-pills"></i>
+          <span>Formulary</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Clinical Protocol Reminders -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-clipboard-check" style="color: var(--accent);"></i> Triage Guidelines</h3>
+      </div>
+      <div style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+        <p style="margin-bottom: 0.75rem;"><strong>1. Patient Vitals:</strong> Always measure and log temperature, pulse/heart rate, and current weight before prescribing NSAIDs or antibiotics.</p>
+        <p style="margin-bottom: 0.75rem;"><strong>2. Adverse Reactions:</strong> Check pet allergy notes prior to administering penicillin or sulfas.</p>
+        <p><strong>3. Rabies Protocol:</strong> Ensure state vaccination booster mandates are audited during routine checkups.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Consultation & Clinical Examination{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-stethoscope" style="color: var(--primary);"></i> Clinical Consultation</h1>
+    <p>Perform diagnostic examinations, log vital signs, formulate treatment plans, and write prescriptions</p>
+  </div>
+  {% if not is_creating %}
+  <div class="page-actions">
+    <a href="{{ url_for('add_consultation') }}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Start New Consultation
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% if is_creating %}
+<!-- Consultation Intake Form -->
+<div class="form-card">
+  <form action="{{ url_for('add_consultation') }}" method="POST" data-validate="true">
+    {% if appointment %}
+      <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
+      <input type="hidden" name="pet_id" value="{{ appointment.pet_id }}">
+      <input type="hidden" name="doctor_id" value="{{ appointment.doc_id or appointment.doctor_id }}">
+      <div style="background: var(--primary-light); padding: 1rem 1.25rem; border-radius: var(--border-radius-md); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="color: var(--primary-dark); font-size: 1.05rem;"><i class="fas fa-paw"></i> Patient: {{ appointment.pet_name }} ({{ appointment.species }})</strong>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">Owner: {{ appointment.owner_name }} &bull; Linked to Appointment #{{ appointment.id }}</div>
+        </div>
+        <span class="badge badge-info">In Consultation</span>
+      </div>
+    {% else %}
+      <div class="form-section-title">
+        <i class="fas fa-paw"></i> Patient & Doctor Assignment
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Patient Pet <span class="required">*</span></label>
+          <select name="pet_id" class="form-control" required>
+            <option value="">-- Choose Patient --</option>
+            {% for p in pets %}
+            <option value="{{ p.id }}">{{ p.name }} ({{ p.species }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Attending Veterinarian <span class="required">*</span></label>
+          <select name="doctor_id" class="form-control" required>
+            {% for d in doctors %}
+            <option value="{{ d.id }}">{{ d.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Clinical Vitals -->
+    <div class="form-section-title">
+      <i class="fas fa-heartbeat"></i> Patient Vitals Triage
+    </div>
+
+    <div class="form-grid-3" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="form-group">
+        <label class="form-label">Body Temperature (°C)</label>
+        <input type="number" step="0.1" name="temperature" class="form-control" placeholder="38.5 (Normal 38-39°C)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Heart Rate (bpm)</label>
+        <input type="number" name="heart_rate" class="form-control" placeholder="80-120 bpm">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Respiration Rate (rpm)</label>
+        <input type="number" name="respiratory_rate" class="form-control" placeholder="15-30 rpm">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Current Weight (kg)</label>
+        <input type="number" step="0.1" name="weight" value="{{ appointment.pet_weight if appointment else '' }}" class="form-control" placeholder="e.g. 28.5">
+      </div>
+    </div>
+
+    <!-- Symptoms & Clinical Diagnosis -->
+    <div class="form-section-title">
+      <i class="fas fa-diagnoses"></i> Findings & Diagnosis
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Reported Symptoms & Clinical Signs <span class="required">*</span></label>
+        <textarea name="symptoms" class="form-control" rows="3" placeholder="e.g. Head tilting, scratching right ear, bilateral brownish wax discharge" required>{{ appointment.reason if appointment else '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Primary Diagnosis <span class="required">*</span></label>
+        <textarea name="diagnosis" class="form-control" rows="3" placeholder="e.g. Acute Otitis Externa (Bacterial / Malassezia)" required></textarea>
+      </div>
+    </div>
+
+    <!-- Treatment Plan & Prescriptions -->
+    <div class="form-section-title">
+      <i class="fas fa-prescription-bottle-alt"></i> Treatment & Prescriptions
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Treatment Plan & Medical Directives <span class="required">*</span></label>
+      <textarea name="treatment_plan" class="form-control" rows="3" placeholder="Clean ears with antiseptic wash. Prescribe topical antibacterial/antifungal drops and oral NSAID for 7 days." required></textarea>
+    </div>
+
+    <!-- Dynamic Prescription Builder -->
+    <div style="background: var(--bg-subtle); padding: 1.5rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">
+          <i class="fas fa-pills" style="color: var(--primary);"></i> Add Prescribed Medications
+        </h4>
+        <button type="button" class="btn btn-outline btn-sm" id="addPrescriptionItemBtn">
+          <i class="fas fa-plus"></i> Add Medicine Row
+        </button>
+      </div>
+
+      <div id="prescriptionItemsContainer">
+        <!-- Dynamic rows appended by static/js/medical.js -->
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Dietary & Nutritional Notes</label>
+        <input type="text" name="dietary_notes" class="form-control" placeholder="e.g. Hypoallergenic diet, withhold dairy">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Recommended Follow-up Visit Date</label>
+        <input type="date" name="follow_up_date" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('consultation') }}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-check-circle"></i> Save Consultation & Medical Chart
+      </button>
+    </div>
+
+  </form>
+</div>
+
+{% else %}
+<!-- Active Outpatient Consultation Queue -->
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <h3 style="font-size: 1.1rem; font-weight: 700;">Scheduled & In-Progress Patients Waiting for Examination</h3>
+  </div>
+
+  {% if appointments %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Time / Date</th>
+          <th>Patient</th>
+          <th>Species</th>
+          <th>Owner</th>
+          <th>Attending Vet</th>
+          <th>Chief Complaint</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+        <tr>
+          <td>
+            <strong>{{ a.appointment_time }}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ a.appointment_date }}</div>
+          </td>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar"><i class="fas fa-paw"></i></div>
+              <div class="table-user-info">
+                <a href="{{ url_for('pet_details', id=a.pet_id) }}" class="name">{{ a.pet_name }}</a>
+              </div>
+            </div>
+          </td>
+          <td>{{ a.species }} ({{ a.breed or 'Mixed' }})</td>
+          <td>{{ a.owner_name }}</td>
+          <td>{{ a.doctor_name }}</td>
+          <td style="max-width: 220px; white-space: normal; font-size: 0.85rem;">{{ a.reason }}</td>
+          <td>
+            <a href="{{ url_for('add_consultation', appointment_id=a.id) }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-stethoscope"></i> Examine
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-stethoscope"></i>
+    <h4>No Patients in Queue</h4>
+    <p>All scheduled consultations for today are completed or none are queued.</p>
+    <a href="{{ url_for('add_consultation') }}" class="btn btn-primary btn-sm">Start Direct Walk-in Consultation</a>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/medical.js') }}"></script>
+{% endblock %}

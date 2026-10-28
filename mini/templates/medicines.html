@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Pharmacy Dispensary & Medicines Catalog{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-pills" style="color: var(--primary);"></i> Pharmacy & Medications Catalog</h1>
+    <p>Track prescription drugs, veterinary surgical supplies, inventory levels, and prices</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('medicine_stock') }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-boxes"></i> Stock Alert Center
+    </a>
+    <a href="{{ url_for('add_medicine') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Add Medicine
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <form method="GET" action="{{ url_for('medicines') }}" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1;">
+      <div class="table-search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search medicine or active ingredient...">
+      </div>
+
+      <div class="table-filters">
+        <select name="category" class="form-control" style="width: 180px; padding: 0.5rem 1rem;" onchange="this.form.submit()">
+          <option value="">All Categories</option>
+          {% for c in categories %}
+          <option value="{{ c }}" {% if selected_cat == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+
+        {% if search or selected_cat %}
+        <a href="{{ url_for('medicines') }}" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i> Clear</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if medicines %}
+  <div class="table-responsive">
+    <table class="custom-table" id="dataTable">
+      <thead>
+        <tr>
+          <th>Medicine Name</th>
+          <th>Generic Ingredient</th>
+          <th>Category</th>
+          <th>Unit Price</th>
+          <th>Current Stock</th>
+          <th>Expiry Date</th>
+          <th>Supplier</th>
+          <th>Quick Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in medicines %}
+        <tr class="medicine-item-row" data-category="{{ m.category }}">
+          <td>
+            <strong style="color: var(--text-primary); font-size: 0.95rem;">{{ m.name }}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ m.unit_type }}</div>
+          </td>
+          <td>{{ m.generic_name or '-' }}</td>
+          <td><span class="badge badge-info">{{ m.category }}</span></td>
+          <td><strong>₹{{ "%.2f"|format(m.unit_price) }}</strong></td>
+          <td class="medicine-stock-cell" data-qty="{{ m.stock_quantity }}" data-min="{{ m.min_stock_level }}">
+            <strong>{{ m.stock_quantity }}</strong> {{ m.unit_type }}
+            {% if m.stock_quantity <= m.min_stock_level %}
+            <span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Low</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if m.expiry_date %}
+            <span style="font-size: 0.85rem;">{{ m.expiry_date }}</span>
+            {% else %}
+            <span style="color: var(--text-muted);">-</span>
+            {% endif %}
+          </td>
+          <td>{{ m.supplier_name or 'Direct' }}</td>
+          <td>
+            <!-- Inline Stock Quantity & Price Quick Update -->
+            <form action="{{ url_for('edit_medicine_stock', id=m.id) }}" method="POST" style="display: flex; gap: 0.35rem; align-items: center;">
+              <input type="number" name="stock_quantity" value="{{ m.stock_quantity }}" style="width: 65px; padding: 0.3rem 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem;" title="Update Quantity">
+              <input type="number" step="0.5" name="unit_price" value="{{ m.unit_price }}" style="width: 70px; padding: 0.3rem 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem;" title="Update Unit Price">
+              <button type="submit" class="action-btn" title="Save Stock / Price Change">
+                <i class="fas fa-save" style="color: var(--primary);"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-pills"></i>
+    <h4>No Medicines Found</h4>
+    <p>No pharmaceutical items match your filter.</p>
+    <a href="{{ url_for('add_medicine') }}" class="btn btn-primary btn-sm">Add New Medicine</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/medicines.js') }}"></script>
+{% endblock %}

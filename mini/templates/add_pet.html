@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Register New Patient | Pet Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-paw" style="color: var(--primary);"></i> Register New Pet Patient</h1>
+    <p>Create a complete medical history chart and assign to a registered owner</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('pets') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-arrow-left"></i> Back to Patients
+    </a>
+  </div>
+</div>
+
+<div class="form-card">
+  <form action="{{ url_for('add_pet') }}" method="POST" enctype="multipart/form-data" data-validate="true">
+    
+    <div class="form-section-title">
+      <i class="fas fa-user-circle"></i> Owner Association
+    </div>
+    
+    <div class="form-grid-2">
+      <div class="form-group full-width">
+        <label class="form-label">Select Pet Parent / Owner <span class="required">*</span></label>
+        <div style="display: flex; gap: 0.75rem;">
+          <select name="owner_id" class="form-control" required style="flex: 1;">
+            <option value="">-- Choose Owner --</option>
+            {% for o in owners %}
+            <option value="{{ o.id }}" {% if preselected_owner == o.id|string %}selected{% endif %}>
+              {{ o.name }} ({{ o.phone }})
+            </option>
+            {% endfor %}
+          </select>
+          <a href="{{ url_for('add_owner') }}" class="btn btn-outline" target="_blank" title="Create New Owner">
+            <i class="fas fa-plus"></i> New Owner
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-id-card"></i> Pet Identification
+    </div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label">Pet Name <span class="required">*</span></label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Bella" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Species <span class="required">*</span></label>
+        <select name="species" class="form-control" required>
+          <option value="Dog">Dog (Canine)</option>
+          <option value="Cat">Cat (Feline)</option>
+          <option value="Bird">Bird (Avian)</option>
+          <option value="Rabbit">Rabbit (Lagomorph)</option>
+          <option value="Reptile">Reptile</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Breed</label>
+        <input type="text" name="breed" class="form-control" placeholder="e.g. Golden Retriever">
+      </div>
+    </div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label">Gender / Reproductive Status</label>
+        <select name="gender" class="form-control">
+          <option value="Male">Male (Intact)</option>
+          <option value="Female">Female (Intact)</option>
+          <option value="Neutered Male">Neutered Male</option>
+          <option value="Spayed Female">Spayed Female</option>
+          <option value="Unknown">Unknown</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input type="date" name="date_of_birth" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estimated Age (Years)</label>
+        <input type="number" name="age_years" class="form-control" min="0" max="40" placeholder="e.g. 3">
+      </div>
+    </div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label">Current Weight (kg)</label>
+        <input type="number" name="weight" step="0.1" class="form-control" placeholder="e.g. 28.5">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Color / Coat Markings</label>
+        <input type="text" name="color" class="form-control" placeholder="e.g. Black & Tan">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Microchip ID Number</label>
+        <input type="text" name="microchip_id" class="form-control" placeholder="15-digit RFID tag">
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-heartbeat"></i> Medical Alerts & Notes
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Known Allergies / Sensitivities</label>
+        <textarea name="allergies" class="form-control" placeholder="e.g. Penicillin sensitivity, poultry protein allergy"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">General Medical / Behavioral Notes</label>
+        <textarea name="medical_notes" class="form-control" placeholder="e.g. Nervous around large dogs, indoor cat, prone to otitis"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-camera"></i> Patient Photo
+    </div>
+
+    <div class="form-group">
+      <div class="file-dropzone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Click or drag & drop pet photograph here</p>
+        <span>Supports JPG, PNG, WEBP (Max 16MB)</span>
+        <input type="file" name="photo" accept="image/*" class="dropzone-input" data-preview-target="petPhotoPreview" data-img-target="previewImg">
+      </div>
+      <div class="preview-container" id="petPhotoPreview">
+        <img id="previewImg" src="#" alt="Pet Preview">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Selected Photo Preview</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('pets') }}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-check-circle"></i> Save Patient Profile
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

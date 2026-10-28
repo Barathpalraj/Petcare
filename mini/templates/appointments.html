@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments & Surgical Schedule{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-calendar-check" style="color: var(--primary);"></i> Appointment Schedule</h1>
+    <p>Track outpatient consultations, surgeries, check-ups, and emergency arrivals</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_appointment') }}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Schedule Appointment
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <!-- Status Filter Buttons -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <a href="{{ url_for('appointments', status='all') }}" class="btn btn-sm {% if current_status == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">
+        All
+      </a>
+      <a href="{{ url_for('appointments', status='scheduled') }}" class="btn btn-sm {% if current_status == 'scheduled' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Scheduled
+      </a>
+      <a href="{{ url_for('appointments', status='in_progress') }}" class="btn btn-sm {% if current_status == 'in_progress' %}btn-primary{% else %}btn-secondary{% endif %}">
+        In Progress
+      </a>
+      <a href="{{ url_for('appointments', status='completed') }}" class="btn btn-sm {% if current_status == 'completed' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Completed
+      </a>
+      <a href="{{ url_for('appointments', status='cancelled') }}" class="btn btn-sm {% if current_status == 'cancelled' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Cancelled
+      </a>
+    </div>
+
+    <!-- Date Picker Filter -->
+    <form method="GET" action="{{ url_for('appointments') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+      <input type="hidden" name="status" value="{{ current_status }}">
+      <input type="date" name="date" value="{{ current_date }}" class="form-control" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;" onchange="this.form.submit()">
+      {% if current_date %}
+      <a href="{{ url_for('appointments', status=current_status) }}" class="btn btn-secondary btn-sm" title="Clear Date"><i class="fas fa-times"></i></a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if appointments %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Patient</th>
+          <th>Owner Contact</th>
+          <th>Attending Vet</th>
+          <th>Reason for Visit</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+        <tr class="appointment-item-row" data-status="{{ a.status }}">
+          <td>
+            <strong>{{ a.appointment_date }}</strong>
+            <div style="font-size: 0.775rem; color: var(--text-muted);">{{ a.appointment_time }}</div>
+          </td>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar"><i class="fas fa-paw"></i></div>
+              <div class="table-user-info">
+                <a href="{{ url_for('pet_details', id=a.pet_id) }}" class="name">{{ a.pet_name }}</a>
+                <span class="sub">{{ a.species }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div><a href="{{ url_for('owner_details', id=a.owner_id) }}">{{ a.owner_name }}</a></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fas fa-phone"></i> {{ a.owner_phone }}</div>
+          </td>
+          <td>
+            <strong>{{ a.doctor_name }}</strong>
+          </td>
+          <td style="max-width: 220px; white-space: normal; font-size: 0.85rem;">
+            {{ a.reason }}
+          </td>
+          <td>
+            <span class="badge badge-{{ a.status }}">{{ a.status.replace('_', ' ') }}</span>
+          </td>
+          <td>
+            <div class="table-actions">
+              <a href="{{ url_for('appointment_details', id=a.id) }}" class="action-btn" title="View Details">
+                <i class="fas fa-eye"></i>
+              </a>
+
+              {% if current_user.role in ['doctor', 'admin'] and a.status in ['scheduled', 'in_progress'] %}
+              <a href="{{ url_for('add_consultation', appointment_id=a.id) }}" class="btn btn-primary btn-sm" title="Start Consultation">
+                <i class="fas fa-stethoscope"></i>
+              </a>
+              {% endif %}
+
+              <form action="{{ url_for('update_appointment_status', id=a.id) }}" method="POST" style="display: inline;">
+                {% if a.status == 'scheduled' %}
+                <button type="submit" name="status" value="in_progress" class="action-btn" title="Check In">
+                  <i class="fas fa-play" style="color: var(--primary);"></i>
+                </button>
+                <button type="submit" name="status" value="cancelled" class="action-btn delete" title="Cancel Booking">
+                  <i class="fas fa-times"></i>
+                </button>
+                {% elif a.status == 'in_progress' %}
+                <button type="submit" name="status" value="completed" class="action-btn" title="Mark Complete">
+                  <i class="fas fa-check" style="color: var(--success);"></i>
+                </button>
+                {% endif %}
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-calendar-alt"></i>
+    <h4>No Appointments Found</h4>
+    <p>No bookings meet the selected criteria.</p>
+    <a href="{{ url_for('add_appointment') }}" class="btn btn-primary btn-sm">Create an Appointment</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

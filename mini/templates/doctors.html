@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Our Veterinary Doctors & Surgeons{% endblock %}
+
+{% block public_content %}
+<div class="section">
+  <div class="section-title-wrapper">
+    <span class="section-tag">Medical Staff</span>
+    <h1 class="section-title">Meet Our Dedicated Doctors</h1>
+    <p class="section-desc">Compassionate, board-certified clinicians dedicated to providing the highest standard of animal healthcare.</p>
+  </div>
+
+  <div class="card-grid">
+    {% for doc in doctors %}
+    <div class="feature-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #0d9488, #2dd4bf); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-md);">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">{{ doc.full_name }}</h3>
+      <div class="badge badge-info" style="margin-bottom: 1rem;">{{ doc.specialization }}</div>
+      
+      <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem; flex: 1;">
+        {{ doc.bio or 'Dr. has extensive clinical experience in canine and feline preventive healthcare, internal diagnostics, and surgical wellness.' }}
+      </p>
+
+      <div style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: left; font-size: 0.85rem; color: var(--text-secondary);">
+        <div style="margin-bottom: 0.4rem;">
+          <strong style="color: var(--text-primary);"><i class="fas fa-id-card-alt"></i> License:</strong> {{ doc.license_number }}
+        </div>
+        <div style="margin-bottom: 0.4rem;">
+          <strong style="color: var(--text-primary);"><i class="fas fa-calendar-alt"></i> Available:</strong> {{ doc.schedule_days }}
+        </div>
+        <div>
+          <strong style="color: var(--text-primary);"><i class="fas fa-clock"></i> Hours:</strong> {{ doc.schedule_hours }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

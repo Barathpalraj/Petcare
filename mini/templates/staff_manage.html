@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Clinic Staff Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-id-badge" style="color: var(--primary);"></i> Clinic Support Staff</h1>
+    <p>Receptionists, veterinary assistants, and pharmacy inventory personnel</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" onclick="document.getElementById('addStaffModal').style.display = 'block'">
+      <i class="fas fa-plus"></i> Register Staff Member
+    </button>
+  </div>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="addStaffModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; overflow-y: auto; padding: 2rem 1rem;">
+  <div class="form-card" style="margin: 2rem auto; position: relative; max-width: 600px;">
+    <button type="button" onclick="document.getElementById('addStaffModal').style.display = 'none'" style="position: absolute; right: 1.5rem; top: 1.5rem; background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;">Add Support Staff Member</h2>
+
+    <form action="{{ url_for('add_staff_member') }}" method="POST" data-validate="true">
+      <div class="form-group">
+        <label class="form-label">Full Name <span class="required">*</span></label>
+        <input type="text" name="full_name" class="form-control" placeholder="e.g. Emily Watson" required>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Email Address <span class="required">*</span></label>
+          <input type="email" name="email" class="form-control" placeholder="e.watson@vetclinic.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-control" placeholder="+1 (555) 019-9912">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Username <span class="required">*</span></label>
+          <input type="text" name="username" class="form-control" placeholder="emilyw" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Password</label>
+          <input type="password" name="password" class="form-control" placeholder="Default: staff123">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addStaffModal').style.display = 'none'">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-lg">Save Staff Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Staff Member</th>
+          <th>Username</th>
+          <th>Email Address</th>
+          <th>Phone</th>
+          <th>Access Role</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for st in staff_members %}
+        <tr>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar" style="background: #f3e8ff; color: #6b21a8;"><i class="fas fa-id-badge"></i></div>
+              <div class="table-user-info">
+                <span class="name">{{ st.full_name }}</span>
+                <span class="sub">Joined: {{ st.created_at.strftime('%Y-%m-%d') }}</span>
+              </div>
+            </div>
+          </td>
+          <td><code>@{{ st.username }}</code></td>
+          <td>{{ st.email }}</td>
+          <td>{{ st.phone or 'N/A' }}</td>
+          <td><span class="badge badge-staff">Staff / Reception</span></td>
+          <td>
+            {% if st.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-danger">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Billing Statements & Invoices{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-file-invoice-dollar" style="color: var(--primary);"></i> Invoices & Client Billing</h1>
+    <p>Manage outpatient statements, surgical billing, itemized pharmacy invoices, and settlement statuses</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('payments') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-receipt"></i> Payment Records
+    </a>
+    <a href="{{ url_for('create_bill') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Generate Invoice
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <!-- Filter status pills -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <a href="{{ url_for('bills', status='all') }}" class="btn btn-sm {% if selected_status == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">
+        All
+      </a>
+      <a href="{{ url_for('bills', status='unpaid') }}" class="btn btn-sm {% if selected_status == 'unpaid' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Unpaid
+      </a>
+      <a href="{{ url_for('bills', status='partial') }}" class="btn btn-sm {% if selected_status == 'partial' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Partial
+      </a>
+      <a href="{{ url_for('bills', status='paid') }}" class="btn btn-sm {% if selected_status == 'paid' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Paid
+      </a>
+    </div>
+
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search invoice number, client, pet..." class="table-search-input" data-table-id="billsTable">
+    </div>
+  </div>
+
+  {% if invoices %}
+  <div class="table-responsive">
+    <table class="custom-table" id="billsTable">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Client</th>
+          <th>Patient Pet</th>
+          <th>Issue Date</th>
+          <th>Subtotal</th>
+          <th>Tax</th>
+          <th>Total Billed</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><strong>{{ inv.invoice_number }}</strong></td>
+          <td>
+            <div><a href="{{ url_for('owner_details', id=inv.owner_id) }}">{{ inv.owner_name }}</a></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fas fa-phone"></i> {{ inv.owner_phone }}</div>
+          </td>
+          <td>
+            <a href="{{ url_for('pet_details', id=inv.pet_id) }}" style="font-weight: 600; color: var(--primary);">
+              <i class="fas fa-paw"></i> {{ inv.pet_name }}
+            </a>
+          </td>
+          <td>{{ inv.invoice_date }}</td>
+          <td>₹{{ "%.2f"|format(inv.subtotal) }}</td>
+          <td>₹{{ "%.2f"|format(inv.tax_amount) }}</td>
+          <td><strong style="font-size: 1.05rem;">₹{{ "%.2f"|format(inv.total_amount) }}</strong></td>
+          <td>
+            <span class="badge badge-{{ inv.payment_status }}">{{ inv.payment_status.title() }}</span>
+          </td>
+          <td>
+            <div class="table-actions">
+              <a href="{{ url_for('invoice_details', id=inv.id) }}" class="action-btn" title="View & Print Invoice">
+                <i class="fas fa-receipt"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-file-invoice-dollar"></i>
+    <h4>No Invoices Found</h4>
+    <p>Generate billing statements for completed consultations and medication dispensing.</p>
+    <a href="{{ url_for('create_bill') }}" class="btn btn-primary btn-sm">Create New Bill</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Pharmacy Stock Levels & Reorder Hub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-boxes" style="color: var(--primary);"></i> Inventory Stock Control & Alerts</h1>
+    <p>Monitor pharmaceutical depletion, restock thresholds, and automatic supplier replenishment</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('medicines') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-pills"></i> All Medicines
+    </a>
+    <a href="{{ url_for('suppliers') }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-truck-loading"></i> Contact Suppliers
+    </a>
+  </div>
+</div>
+
+<!-- Low Stock Priority Alert Card -->
+<div class="dashboard-card" style="margin-bottom: 2rem; border-left: 4px solid var(--danger);">
+  <div class="dashboard-card-header">
+    <h3 style="color: var(--danger);">
+      <i class="fas fa-exclamation-triangle"></i> Urgent Replenishment Needed ({{ low_stock|length }} Items Below Threshold)
+    </h3>
+  </div>
+
+  {% if low_stock %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Medicine</th>
+          <th>Category</th>
+          <th>Available Stock</th>
+          <th>Minimum Level</th>
+          <th>Distributor</th>
+          <th>Supplier Phone</th>
+          <th>Quick Restock</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in low_stock %}
+        <tr style="background: #fff5f5;">
+          <td>
+            <strong>{{ m.name }}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ m.unit_type }}</div>
+          </td>
+          <td><span class="badge badge-info">{{ m.category }}</span></td>
+          <td>
+            <span class="badge badge-danger font-bold" style="font-size: 0.85rem;">
+              {{ m.stock_quantity }} Remaining
+            </span>
+          </td>
+          <td>{{ m.min_stock_level }} units</td>
+          <td>{{ m.supplier_name or 'Independent' }}</td>
+          <td><strong><i class="fas fa-phone-alt"></i> {{ m.supplier_phone or 'N/A' }}</strong></td>
+          <td>
+            <form action="{{ url_for('edit_medicine_stock', id=m.id) }}" method="POST" style="display: flex; gap: 0.4rem; align-items: center;">
+              <input type="hidden" name="unit_price" value="{{ m.unit_price }}">
+              <input type="number" name="stock_quantity" value="{{ m.stock_quantity + 50 }}" style="width: 75px; padding: 0.35rem; border: 1px solid var(--border-color); border-radius: 4px;" title="New Restocked Total">
+              <button type="submit" class="btn btn-primary btn-sm" title="Add 50 Units & Save">
+                <i class="fas fa-plus"></i> Restock
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 2rem 1rem; color: var(--success);">
+    <i class="fas fa-check-circle" style="font-size: 2.5rem; margin-bottom: 0.5rem;"></i>
+    <h4>All Stocks Healthy</h4>
+    <p style="color: var(--text-secondary); font-size: 0.9rem;">Every pharmaceutical product is currently operating well above minimum safety thresholds.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Full Inventory Level Visualizer -->
+<div class="dashboard-card">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-chart-bar" style="color: var(--secondary);"></i> Real-Time Inventory Stock Health</h3>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {% for med in all_inventory %}
+    {% set pct = (med.stock_quantity / (med.min_stock_level * 3) * 100)|round|int %}
+    {% set safe_pct = 100 if pct > 100 else pct %}
+    <div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.35rem;">
+        <span style="font-weight: 700; color: var(--text-primary);">{{ med.name }} ({{ med.category }})</span>
+        <span style="font-weight: 600; color: var(--text-secondary);">{{ med.stock_quantity }} {{ med.unit_type }} / Min: {{ med.min_stock_level }}</span>
+      </div>
+      <div style="width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+        <div class="progress-bar-fill" data-percent="{{ safe_pct }}" style="width: 0%; height: 100%; border-radius: 10px; background: {% if med.stock_quantity <= med.min_stock_level %}var(--danger){% elif med.stock_quantity <= med.min_stock_level * 1.5 %}var(--warning){% else %}var(--primary){% endif %};"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

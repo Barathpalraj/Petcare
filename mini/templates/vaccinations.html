@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Pet Immunization & Vaccination Passport{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-syringe" style="color: var(--primary);"></i> Vaccination & Immunization Tracker</h1>
+    <p>Monitor patient vaccine passports, annual booster timelines, and rabies compliance</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('vaccination_history') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-history"></i> Full History
+    </a>
+    <a href="{{ url_for('add_vaccination') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Administer Vaccine
+    </a>
+  </div>
+</div>
+
+<!-- Vaccine Status KPIs -->
+<div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Up to Date</p>
+      <div class="stat-number" style="color: var(--success);">{{ stats.up_to_date }}</div>
+      <div class="stat-trend trend-up"><i class="fas fa-check-circle"></i> Protected Patients</div>
+    </div>
+    <div class="stat-icon-wrapper icon-emerald"><i class="fas fa-shield-alt"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Due Soon (30 Days)</p>
+      <div class="stat-number" style="color: var(--warning);">{{ stats.due_soon }}</div>
+      <div class="stat-trend trend-neutral"><i class="fas fa-clock"></i> Booster Imminent</div>
+    </div>
+    <div class="stat-icon-wrapper icon-amber"><i class="fas fa-bell"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Overdue Boosters</p>
+      <div class="stat-number" style="color: var(--danger);">{{ stats.overdue }}</div>
+      <div class="stat-trend trend-down"><i class="fas fa-exclamation-circle"></i> Requires Outreach</div>
+    </div>
+    <div class="stat-icon-wrapper icon-rose"><i class="fas fa-exclamation-triangle"></i></div>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by patient, vaccine, or owner..." class="table-search-input" data-table-id="vaxTable">
+    </div>
+  </div>
+
+  {% if vaccinations %}
+  <div class="table-responsive">
+    <table class="custom-table" id="vaxTable">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Vaccine Name</th>
+          <th>Administered Date</th>
+          <th>Next Due Date</th>
+          <th>Batch Number</th>
+          <th>Veterinarian</th>
+          <th>Owner Contact</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vaccinations %}
+        <tr>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar"><i class="fas fa-paw"></i></div>
+              <div class="table-user-info">
+                <a href="{{ url_for('pet_details', id=v.pet_id) }}" class="name">{{ v.pet_name }}</a>
+                <span class="sub">{{ v.species }}</span>
+              </div>
+            </div>
+          </td>
+          <td><strong>{{ v.vaccine_name }}</strong></td>
+          <td>{{ v.administered_date }}</td>
+          <td><strong>{{ v.next_due_date }}</strong></td>
+          <td><code>{{ v.batch_number or 'N/A' }}</code></td>
+          <td>{{ v.veterinarian_name }}</td>
+          <td>
+            <div>{{ v.owner_name }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fas fa-phone"></i> {{ v.owner_phone }}</div>
+          </td>
+          <td>
+            <span class="badge badge-{{ v.status }}">{{ v.status.replace('_', ' ') }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-syringe"></i>
+    <h4>No Vaccinations Logged</h4>
+    <p>Record preventative immunizations to keep patient passports updated.</p>
+    <a href="{{ url_for('add_vaccination') }}" class="btn btn-primary btn-sm">Log Vaccination</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

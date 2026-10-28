@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pet.name }} ({{ pet.species }}) - Medical Chart{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-notes-medical" style="color: var(--primary);"></i> Patient Chart: {{ pet.name }}</h1>
+    <p>Comprehensive clinical history, immunization passport, and treatment records</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_appointment', pet_id=pet.id) }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-calendar-plus"></i> Book Visit
+    </a>
+    <a href="{{ url_for('add_consultation') }}?pet_id={{ pet.id }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-stethoscope"></i> New Consult
+    </a>
+    <a href="{{ url_for('edit_pet', id=pet.id) }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-edit"></i> Edit Profile
+    </a>
+  </div>
+</div>
+
+<!-- Patient Header Card -->
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+    <div style="width: 100px; height: 100px; border-radius: var(--border-radius-md); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 3rem; flex-shrink: 0; border: 2px solid var(--border-color);">
+      {% if pet.species == 'Cat' %}
+        <i class="fas fa-cat"></i>
+      {% elif pet.species == 'Bird' %}
+        <i class="fas fa-dove"></i>
+      {% else %}
+        <i class="fas fa-dog"></i>
+      {% endif %}
+    </div>
+
+    <div style="flex: 1;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+        <h2 style="font-size: 1.8rem; font-weight: 800;">{{ pet.name }}</h2>
+        <span class="badge badge-info">{{ pet.species }} - {{ pet.breed or 'Mixed' }}</span>
+        <span class="badge badge-secondary">{{ pet.gender }}</span>
+        <span class="badge badge-success">{{ pet.age_years }} Years Old</span>
+      </div>
+
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-secondary);">
+        <div><strong>Weight:</strong> {{ pet.weight }} kg</div>
+        <div><strong>Color:</strong> {{ pet.color or 'N/A' }}</div>
+        <div><strong>DOB:</strong> {{ pet.date_of_birth or 'Unknown' }}</div>
+        <div><strong>Microchip:</strong> <code>{{ pet.microchip_id or 'None' }}</code></div>
+      </div>
+    </div>
+
+    <!-- Owner Quick Contact Card -->
+    <div style="background: var(--bg-subtle); padding: 1rem 1.5rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); min-width: 240px;">
+      <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Pet Parent</div>
+      <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary);">
+        <a href="{{ url_for('owner_details', id=pet.owner_id) }}">{{ pet.owner_name }}</a>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+        <i class="fas fa-phone-alt" style="color: var(--primary);"></i> {{ pet.owner_phone }}
+      </div>
+    </div>
+  </div>
+
+  {% if pet.allergies %}
+  <div style="margin-top: 1.5rem; padding: 0.85rem 1.25rem; border-radius: var(--border-radius-sm); background: #fee2e2; border-left: 4px solid var(--danger); display: flex; align-items: center; gap: 0.75rem;">
+    <i class="fas fa-allergies" style="color: var(--danger); font-size: 1.25rem;"></i>
+    <div>
+      <strong style="color: #991b1b;">Medical Alert / Known Allergies:</strong>
+      <span style="color: #7f1d1d;">{{ pet.allergies }}</span>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Section 1: Medical Records & Consultations -->
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-stethoscope" style="color: var(--primary);"></i> Clinical Consultation Records</h3>
+    <a href="{{ url_for('add_consultation') }}?pet_id={{ pet.id }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> New Record
+    </a>
+  </div>
+
+  {% if medical_records %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Attending Vet</th>
+          <th>Symptoms</th>
+          <th>Diagnosis</th>
+          <th>Vitals (T / HR / RR)</th>
+          <th>Treatment Plan</th>
+          <th>Follow-up</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in medical_records %}
+        <tr>
+          <td><strong>{{ rec.record_date }}</strong></td>
+          <td>{{ rec.doctor_name }}</td>
+          <td style="max-width: 180px; white-space: normal;">{{ rec.symptoms }}</td>
+          <td><span class="badge badge-warning">{{ rec.diagnosis }}</span></td>
+          <td>
+            <span style="font-size: 0.8rem;">
+              {{ rec.temperature or '-' }}°C | {{ rec.heart_rate or '-' }}bpm | {{ rec.respiratory_rate or '-' }}rpm
+            </span>
+          </td>
+          <td style="max-width: 200px; white-space: normal;">{{ rec.treatment_plan }}</td>
+          <td>{{ rec.follow_up_date or 'None' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-notes-medical"></i>
+    <h4>No Consultations Logged Yet</h4>
+    <p>This patient has no recorded clinical diagnoses in their chart.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Section 2: Vaccination Passport -->
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-syringe" style="color: var(--secondary);"></i> Immunization & Vaccination Passport</h3>
+    <a href="{{ url_for('add_vaccination') }}?pet_id={{ pet.id }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-plus"></i> Administer Vaccine
+    </a>
+  </div>
+
+  {% if vaccinations %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Vaccine</th>
+          <th>Administered Date</th>
+          <th>Next Due Date</th>
+          <th>Batch #</th>
+          <th>Veterinarian</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vaccinations %}
+        <tr>
+          <td><strong>{{ v.vaccine_name }}</strong></td>
+          <td>{{ v.administered_date }}</td>
+          <td><strong>{{ v.next_due_date }}</strong></td>
+          <td><code>{{ v.batch_number or 'N/A' }}</code></td>
+          <td>{{ v.veterinarian_name }}</td>
+          <td><span class="badge badge-{{ v.status }}">{{ v.status.replace('_', ' ') }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-syringe"></i>
+    <h4>No Vaccinations Recorded</h4>
+    <p>Log this pet's Rabies, DHPP, or FVRCP immunizations.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Section 3: Billing Statements -->
+<div class="dashboard-card">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-file-invoice-dollar" style="color: var(--accent);"></i> Invoices for {{ pet.name }}</h3>
+    <a href="{{ url_for('create_bill') }}?pet_id={{ pet.id }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-plus"></i> Generate Bill
+    </a>
+  </div>
+
+  {% if invoices %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Date</th>
+          <th>Subtotal</th>
+          <th>Total</th>
+          <th>Payment Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><strong>{{ inv.invoice_number }}</strong></td>
+          <td>{{ inv.invoice_date }}</td>
+          <td>₹{{ "%.2f"|format(inv.subtotal) }}</td>
+          <td><strong>₹{{ "%.2f"|format(inv.total_amount) }}</strong></td>
+          <td><span class="badge badge-{{ inv.payment_status }}">{{ inv.payment_status }}</span></td>
+          <td>
+            <a href="{{ url_for('invoice_details', id=inv.id) }}" class="action-btn" title="View Printable Bill">
+              <i class="fas fa-receipt"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

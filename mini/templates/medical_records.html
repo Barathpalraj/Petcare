@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Records & Consultation History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-notes-medical" style="color: var(--primary);"></i> Medical Records Archive</h1>
+    <p>Central electronic repository of all clinical consultations, vitals, and physician directives</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_consultation') }}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> New Medical Record
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <div class="table-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search records by patient, condition, or vet..." class="table-search-input" data-table-id="medRecordsTable">
+    </div>
+  </div>
+
+  {% if records %}
+  <div class="table-responsive">
+    <table class="custom-table" id="medRecordsTable">
+      <thead>
+        <tr>
+          <th>Record Date</th>
+          <th>Patient</th>
+          <th>Owner</th>
+          <th>Doctor</th>
+          <th>Diagnosis</th>
+          <th>Vitals (T / HR / RR)</th>
+          <th>Treatment Plan</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in records %}
+        <tr>
+          <td><strong>{{ m.record_date }}</strong></td>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar"><i class="fas fa-paw"></i></div>
+              <div class="table-user-info">
+                <a href="{{ url_for('pet_details', id=m.pet_id) }}" class="name">{{ m.pet_name }}</a>
+                <span class="sub">{{ m.species }}</span>
+              </div>
+            </div>
+          </td>
+          <td>{{ m.owner_name }}</td>
+          <td><strong>{{ m.doctor_name }}</strong></td>
+          <td><span class="badge badge-warning">{{ m.diagnosis }}</span></td>
+          <td style="font-size: 0.8rem;">
+            {{ m.temperature or '-' }}°C &bull; {{ m.heart_rate or '-' }}bpm &bull; {{ m.respiratory_rate or '-' }}rpm
+          </td>
+          <td style="max-width: 220px; white-space: normal; font-size: 0.85rem;">
+            {{ m.treatment_plan }}
+          </td>
+          <td>
+            <a href="{{ url_for('pet_details', id=m.pet_id) }}" class="action-btn" title="View Full Chart">
+              <i class="fas fa-folder-open"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-notes-medical"></i>
+    <h4>No Medical Records Found</h4>
+    <p>Perform clinical examinations to populate electronic health records.</p>
+    <a href="{{ url_for('add_consultation') }}" class="btn btn-primary btn-sm">Start Consultation</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Executive Reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-file-alt" style="color: var(--primary);"></i> Management & Audit Reports</h1>
+    <p>Financial performance reconciliation, patient throughput metrics, and clinical audits</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" onclick="window.print()" class="btn btn-secondary btn-sm">
+      <i class="fas fa-print"></i> Print Executive Report
+    </button>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+  <div class="dashboard-card">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Gross Invoiced Billing</div>
+    <div class="stat-number" style="color: var(--primary); margin: 0.5rem 0;">₹{{ "%.2f"|format(total_invoiced) }}</div>
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">Total value of all services and medications billed.</p>
+  </div>
+
+  <div class="dashboard-card">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Cash & Card Collections</div>
+    <div class="stat-number" style="color: var(--success); margin: 0.5rem 0;">₹{{ "%.2f"|format(total_collected) }}</div>
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">Actual revenue settled into clinic bank accounts.</p>
+  </div>
+
+  <div class="dashboard-card">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Outstanding Receivables</div>
+    {% set outstanding = [0.0, total_invoiced - total_collected]|max %}
+    <div class="stat-number" style="color: var(--danger); margin: 0.5rem 0;">₹{{ "%.2f"|format(outstanding) }}</div>
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">Pending settlement by pet parents or insurers.</p>
+  </div>
+
+  <div class="dashboard-card">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Clinical Throughput</div>
+    <div class="stat-number" style="color: var(--secondary); margin: 0.5rem 0;">{{ total_consults }}</div>
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">Diagnostic consultations & records documented.</p>
+  </div>
+</div>
+
+<div class="dashboard-card">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-clipboard-check"></i> Clinic Compliance & Operational Summary</h3>
+  </div>
+  <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;">
+    <p><strong>Reporting Period:</strong> Year-to-Date {{ today_date[:4] }}</p>
+    <p><strong>Primary Veterinary Hospital:</strong> {{ clinic_name }}</p>
+    <p><strong>State Facility License:</strong> VET-HOSP-90210-CA</p>
+    <p><strong>Chief Medical Officer:</strong> Dr. Sarah Jenkins, DVM</p>
+    <p><strong>Operating Status:</strong> Fully compliant with State Board of Veterinary Medical Examiners and controlled substance pharmacy guidelines.</p>
+  </div>
+</div>
+{% endblock %}

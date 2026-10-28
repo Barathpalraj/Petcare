@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Book Veterinary Appointment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-calendar-plus" style="color: var(--primary);"></i> Book Clinical Appointment</h1>
+    <p>Schedule a routine wellness exam, diagnostic triage, surgery, or vaccination visit</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('appointments') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-arrow-left"></i> All Appointments
+    </a>
+  </div>
+</div>
+
+<div class="form-card">
+  <form action="{{ url_for('add_appointment') }}" method="POST" data-validate="true">
+    
+    <div class="form-section-title">
+      <i class="fas fa-paw"></i> Patient & Doctor Assignment
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Select Patient Pet <span class="required">*</span></label>
+        <select name="pet_id" class="form-control" required>
+          <option value="">-- Choose Patient --</option>
+          {% for p in pets %}
+          <option value="{{ p.id }}" {% if preselected_pet == p.id|string %}selected{% endif %}>
+            {{ p.name }} ({{ p.species }}) - Owner: {{ p.owner_name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Assigned Doctor <span class="required">*</span></label>
+        <select name="doctor_id" class="form-control" required>
+          <option value="">-- Choose Veterinarian --</option>
+          {% for d in doctors %}
+          <option value="{{ d.id }}">
+            {{ d.full_name }} ({{ d.specialization }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-clock"></i> Appointment Schedule
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Date of Visit <span class="required">*</span></label>
+        <input type="date" name="appointment_date" value="{{ today_date }}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Selected Time Slot <span class="required">*</span></label>
+        <input type="text" name="appointment_time" id="appointmentTimeInput" value="10:00 AM" class="form-control" required readonly>
+      </div>
+    </div>
+
+    <!-- Quick Time Slot Chips Selection -->
+    <div class="form-group">
+      <label class="form-label">Available Time Slots</label>
+      <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+        {% for slot in ['08:30 AM', '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '01:30 PM', '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM'] %}
+        <button type="button" class="time-slot-chip btn btn-secondary btn-sm {% if slot == '10:00 AM' %}selected{% endif %}" data-time="{{ slot }}">
+          {{ slot }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-comment-medical"></i> Visit Details
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Chief Complaint / Reason for Visit <span class="required">*</span></label>
+      <textarea name="reason" class="form-control" rows="3" placeholder="e.g. Annual vaccination booster and ear itching checkup" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Preparation / Pre-visit Notes</label>
+      <input type="text" name="notes" class="form-control" placeholder="e.g. Fasting required after midnight for morning bloodwork">
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('appointments') }}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-calendar-check"></i> Confirm Booking
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/appointments.js') }}"></script>
+{% endblock %}

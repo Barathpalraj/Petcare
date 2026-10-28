@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Compassion Meets Clinical Excellence{% endblock %}
+
+{% block public_content %}
+<div class="section">
+  <div class="section-title-wrapper">
+    <span class="section-tag">About PawCare</span>
+    <h1 class="section-title">Dedicated to Veterinary Excellence Since 2014</h1>
+    <p class="section-desc">We combine progressive veterinary medicine with genuine warmth to care for your pets throughout every phase of life.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-bottom: 4rem;">
+    <div>
+      <h2 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--text-primary);">
+        A Modern Hospital Designed for Stress-Free Pet Care
+      </h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.7;">
+        Founded with a vision to transform veterinary care, PawCare operates as a fully integrated companion animal hospital. Our facilities include dedicated feline and canine waiting bays to minimize patient anxiety, HEPA-filtered surgical suites, and advanced point-of-care ultrasound diagnostics.
+      </p>
+      <p style="color: var(--text-secondary); line-height: 1.7;">
+        Every member of our team is Fear-Free certified, meaning we focus not just on the medical pathology, but on the emotional comfort and well-being of each animal entrusted to us.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+        <div style="background: white; padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+          <i class="fas fa-microscope" style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+          <h4 style="font-weight: 700;">In-House Pathology</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Instant laboratory test results within 15 minutes.</p>
+        </div>
+        <div style="background: white; padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+          <i class="fas fa-laptop-medical" style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+          <h4 style="font-weight: 700;">Digital EHR System</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Real-time synchronized medical and vaccination records.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: var(--border-radius-lg); padding: 3rem; color: white; text-align: center; box-shadow: var(--shadow-xl);">
+      <i class="fas fa-hospital" style="font-size: 4rem; color: #2dd4bf; margin-bottom: 1.5rem;"></i>
+      <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 1rem;">Our Mission & Core Values</h3>
+      <p style="opacity: 0.85; line-height: 1.7; font-size: 0.95rem;">
+        "To deliver accurate, empathetic, and innovative veterinary healthcare that strengthens the eternal bond between humans and their animal family members."
+      </p>
+      <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+        <span class="badge badge-success"><i class="fas fa-check"></i> Integrity</span>
+        <span class="badge badge-info"><i class="fas fa-check"></i> Innovation</span>
+        <span class="badge badge-warning"><i class="fas fa-check"></i> Compassion</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

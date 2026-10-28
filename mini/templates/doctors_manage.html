@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Doctors & Veterinarians Directory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-user-md" style="color: var(--primary);"></i> Veterinary Doctors Directory</h1>
+    <p>Manage medical credentials, consultation fees, and weekly roster schedules</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" onclick="document.getElementById('addDoctorModal').style.display = 'block'">
+      <i class="fas fa-plus"></i> Add New Doctor
+    </button>
+  </div>
+</div>
+
+<!-- Add Doctor Modal -->
+<div id="addDoctorModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; overflow-y: auto; padding: 2rem 1rem;">
+  <div class="form-card" style="margin: 2rem auto; position: relative;">
+    <button type="button" onclick="document.getElementById('addDoctorModal').style.display = 'none'" style="position: absolute; right: 1.5rem; top: 1.5rem; background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;">Register New Veterinary Doctor</h2>
+
+    <form action="{{ url_for('add_doctor_profile') }}" method="POST" data-validate="true">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Full Name with Title <span class="required">*</span></label>
+          <input type="text" name="full_name" class="form-control" placeholder="e.g. Dr. Jane Cooper, DVM" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address <span class="required">*</span></label>
+          <input type="email" name="email" class="form-control" placeholder="j.cooper@vetclinic.com" required>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label">Username <span class="required">*</span></label>
+          <input type="text" name="username" class="form-control" placeholder="drcooper" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Password</label>
+          <input type="password" name="password" class="form-control" placeholder="Default: doctor123">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-control" placeholder="+1 (555) 000-0000">
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label">Medical Specialization <span class="required">*</span></label>
+          <input type="text" name="specialization" class="form-control" placeholder="e.g. Feline Internal Medicine" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">License Number <span class="required">*</span></label>
+          <input type="text" name="license_number" class="form-control" placeholder="e.g. VET-CA-9988" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Consultation Fee (₹)</label>
+          <input type="number" name="consultation_fee" step="0.5" class="form-control" value="55.00">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Schedule Days</label>
+          <input type="text" name="schedule_days" class="form-control" value="Mon,Tue,Wed,Thu,Fri">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Schedule Hours</label>
+          <input type="text" name="schedule_hours" class="form-control" value="09:00 AM - 05:00 PM">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Clinical Bio & Background</label>
+        <textarea name="bio" class="form-control" rows="3" placeholder="Summary of clinical veterinary experience..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addDoctorModal').style.display = 'none'">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-lg">Add Doctor to Staff</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Doctors List Table -->
+<div class="table-wrapper">
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Doctor</th>
+          <th>Specialization</th>
+          <th>License #</th>
+          <th>Consultation Fee</th>
+          <th>Available Schedule</th>
+          <th>Contact</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in doctors %}
+        <tr>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar" style="background: var(--primary-light); color: var(--primary);">
+                <i class="fas fa-user-md"></i>
+              </div>
+              <div class="table-user-info">
+                <span class="name">{{ doc.full_name }}</span>
+                <span class="sub">{{ doc.experience_years }} Years Experience</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-info">{{ doc.specialization }}</span></td>
+          <td><code>{{ doc.license_number }}</code></td>
+          <td><strong>₹{{ "%.2f"|format(doc.consultation_fee) }}</strong></td>
+          <td>
+            <div>{{ doc.schedule_days }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ doc.schedule_hours }}</div>
+          </td>
+          <td>
+            <div>{{ doc.email }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ doc.phone or 'No phone' }}</div>
+          </td>
+          <td>
+            {% if doc.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-danger">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

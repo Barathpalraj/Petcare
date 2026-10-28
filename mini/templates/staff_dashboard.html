@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Reception & Front Desk Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-id-badge" style="color: var(--primary);"></i> Front Desk Reception Portal</h1>
+    <p>Patient admissions, appointment check-ins, and client billing triage for {{ today_date }}</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_owner') }}" class="btn btn-outline btn-sm">
+      <i class="fas fa-user-plus"></i> New Client
+    </a>
+    <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-paw"></i> New Pet
+    </a>
+    <a href="{{ url_for('create_bill') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-receipt"></i> Checkout Bill
+    </a>
+  </div>
+</div>
+
+<!-- Mini Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Total Registered Pets</p>
+      <div class="stat-number">{{ stats.total_pets }}</div>
+      <div class="stat-trend trend-up"><i class="fas fa-check"></i> System Records</div>
+    </div>
+    <div class="stat-icon-wrapper icon-teal"><i class="fas fa-dog"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Today's Patient Queue</p>
+      <div class="stat-number">{{ stats.today_queue }}</div>
+      <div class="stat-trend trend-neutral"><i class="fas fa-calendar-day"></i> Visits Today</div>
+    </div>
+    <div class="stat-icon-wrapper icon-amber"><i class="fas fa-clock"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info-left">
+      <p>Pending Settlements</p>
+      <div class="stat-number">{{ stats.pending_bills }}</div>
+      <div class="stat-trend trend-down"><i class="fas fa-file-invoice-dollar"></i> Unpaid Bills</div>
+    </div>
+    <div class="stat-icon-wrapper icon-rose"><i class="fas fa-cash-register"></i></div>
+  </div>
+</div>
+
+<div class="dashboard-row">
+  <!-- Today's Check-in Queue -->
+  <div>
+    <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-calendar-check" style="color: var(--primary);"></i> Today's Front-Desk Check-In Queue</h3>
+        <span class="badge badge-info">{{ queue|length }} Appointments</span>
+      </div>
+
+      {% if queue %}
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Patient</th>
+              <th>Owner & Contact</th>
+              <th>Doctor</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in queue %}
+            <tr>
+              <td><strong>{{ appt.appointment_time }}</strong></td>
+              <td>
+                <div class="table-user-cell">
+                  <div class="table-avatar"><i class="fas fa-paw"></i></div>
+                  <div class="table-user-info">
+                    <span class="name">{{ appt.pet_name }}</span>
+                    <span class="sub">{{ appt.species }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>{{ appt.owner_name }}</div>
+                <div style="font-size: 0.775rem; color: var(--text-muted);"><i class="fas fa-phone"></i> {{ appt.phone }}</div>
+              </td>
+              <td>{{ appt.doctor_name }}</td>
+              <td>
+                <span class="badge badge-{{ appt.status }}">{{ appt.status.replace('_', ' ') }}</span>
+              </td>
+              <td>
+                <form action="{{ url_for('update_appointment_status', id=appt.id) }}" method="POST" style="display: inline-flex; gap: 0.25rem;">
+                  {% if appt.status == 'scheduled' %}
+                  <button type="submit" name="status" value="in_progress" class="btn btn-primary btn-sm" title="Mark In-Progress / Checked In">
+                    <i class="fas fa-sign-in-alt"></i> Check In
+                  </button>
+                  {% elif appt.status == 'in_progress' %}
+                  <button type="submit" name="status" value="completed" class="btn btn-sm" style="background: var(--success); color: white;" title="Mark Completed">
+                    <i class="fas fa-check"></i> Done
+                  </button>
+                  {% endif %}
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-calendar-day"></i>
+        <h4>Queue is Clear</h4>
+        <p>No appointments pending check-in for today.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Unpaid Invoices Ready for Payment -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-cash-register" style="color: var(--secondary);"></i> Pending Patient Settlements</h3>
+        <a href="{{ url_for('bills') }}">View All Invoices <i class="fas fa-chevron-right"></i></a>
+      </div>
+
+      {% if unpaid_invoices %}
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Client</th>
+              <th>Patient</th>
+              <th>Balance</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in unpaid_invoices %}
+            <tr>
+              <td><strong>{{ inv.invoice_number }}</strong></td>
+              <td>
+                <div>{{ inv.owner_name }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ inv.owner_phone }}</div>
+              </td>
+              <td>{{ inv.pet_name }}</td>
+              <td><strong style="color: var(--danger);">₹{{ "%.2f"|format(inv.total_amount) }}</strong></td>
+              <td>
+                <a href="{{ url_for('invoice_details', id=inv.id) }}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Column: Front-Desk Quick Launchers -->
+  <div>
+    <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+      <div class="dashboard-card-header">
+        <h3><i class="fas fa-bolt" style="color: var(--accent);"></i> Reception Actions</h3>
+      </div>
+      <div class="quick-actions-grid">
+        <a href="{{ url_for('add_owner') }}" class="quick-action-item">
+          <i class="fas fa-user-plus"></i>
+          <span>Register Owner</span>
+        </a>
+        <a href="{{ url_for('add_pet') }}" class="quick-action-item">
+          <i class="fas fa-paw"></i>
+          <span>Register Pet</span>
+        </a>
+        <a href="{{ url_for('add_appointment') }}" class="quick-action-item">
+          <i class="fas fa-calendar-plus"></i>
+          <span>Book Visit</span>
+        </a>
+        <a href="{{ url_for('create_bill') }}" class="quick-action-item">
+          <i class="fas fa-receipt"></i>
+          <span>Generate Bill</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

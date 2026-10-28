@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Portal Login | {{ clinic_name }}</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+</head>
+<body class="login-page">
+
+  <!-- Floating animated background blur elements -->
+  <div class="login-bg-shapes">
+    <div class="bg-bubble bubble-1"></div>
+    <div class="bg-bubble bubble-2"></div>
+  </div>
+
+  <!-- Flash Toast Notifications -->
+  <div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-toast toast-{{ category }}">
+            <div class="toast-icon">
+              {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+              {% elif category == 'danger' or category == 'error' %}<i class="fas fa-exclamation-circle"></i>
+              {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            <button class="toast-close" type="button"><i class="fas fa-times"></i></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Login Card Container -->
+  <div class="login-container">
+    <!-- Left Hero Brand Panel -->
+    <div class="login-hero-side">
+      <div class="login-brand-header">
+        <i class="fas fa-paw"></i>
+        <span>PawCare Vet</span>
+      </div>
+
+      <div class="login-hero-body">
+        <h2>Smart Veterinary Management Platform</h2>
+        <p>
+          Seamlessly orchestrate patient clinical records, diagnostic appointments, pharmacy dispensing, and surgical scheduling with high efficiency.
+        </p>
+
+        <div class="login-feature-pills">
+          <span class="feature-pill"><i class="fas fa-bolt"></i> Real-time Queue</span>
+          <span class="feature-pill"><i class="fas fa-prescription"></i> Digital Rx</span>
+          <span class="feature-pill"><i class="fas fa-shield-alt"></i> HIPAA-Secure</span>
+        </div>
+      </div>
+
+      <div style="font-size: 0.85rem; opacity: 0.8;">
+        <i class="fas fa-lock"></i> Authorized Medical & Support Personnel Only
+      </div>
+    </div>
+
+    <!-- Right Login Form Panel -->
+    <div class="login-form-side">
+      <div class="login-form-header">
+        <h3>Staff Sign In</h3>
+        <p>Enter your clinic credentials or choose a 1-click demo role below</p>
+      </div>
+
+      <!-- Quick Demo Login Bar -->
+      <div class="demo-credentials-box">
+        <strong><i class="fas fa-magic"></i> Quick 1-Click Demo Logins:</strong>
+        <div class="demo-chips">
+          <a href="{{ url_for('login', demo='admin') }}" class="demo-chip">
+            <i class="fas fa-user-shield"></i> Admin
+          </a>
+          <a href="{{ url_for('login', demo='doctor') }}" class="demo-chip">
+            <i class="fas fa-user-md"></i> Doctor
+          </a>
+          <a href="{{ url_for('login', demo='staff') }}" class="demo-chip">
+            <i class="fas fa-id-badge"></i> Staff
+          </a>
+        </div>
+      </div>
+
+      <form action="{{ url_for('login') }}" method="POST" data-validate="true">
+        <div class="form-group">
+          <label for="username">Username or Email</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" name="username" placeholder="admin / doctor / staff" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-key"></i>
+            <input type="password" id="password" name="password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+          <i class="fas fa-sign-in-alt"></i> Access Dashboard
+        </button>
+
+        <div class="form-footer-link">
+          <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Return to Homepage</a>
+          <span style="color: var(--text-muted);">Default pwd: admin123</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+</body>
+</html>

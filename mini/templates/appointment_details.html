@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment #{{ appointment.id }} - {{ appointment.pet_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-calendar-check" style="color: var(--primary);"></i> Appointment #{{ appointment.id }}</h1>
+    <p>Scheduled visit for {{ appointment.pet_name }} on {{ appointment.appointment_date }} at {{ appointment.appointment_time }}</p>
+  </div>
+  <div class="page-actions">
+    {% if appointment.status in ['scheduled', 'in_progress'] and current_user.role in ['doctor', 'admin'] %}
+    <a href="{{ url_for('add_consultation', appointment_id=appointment.id) }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-stethoscope"></i> Begin Consultation
+    </a>
+    {% endif %}
+    <a href="{{ url_for('create_bill', appointment_id=appointment.id) }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-file-invoice-dollar"></i> Generate Bill
+    </a>
+  </div>
+</div>
+
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span class="badge badge-{{ appointment.status }}" style="font-size: 0.95rem; padding: 0.4rem 1rem;">
+        Status: {{ appointment.status.replace('_', ' ').title() }}
+      </span>
+    </div>
+
+    <!-- Status transition form -->
+    <form action="{{ url_for('update_appointment_status', id=appointment.id) }}" method="POST" style="display: flex; gap: 0.5rem;">
+      {% if appointment.status == 'scheduled' %}
+      <button type="submit" name="status" value="in_progress" class="btn btn-primary btn-sm">
+        <i class="fas fa-play"></i> Check In / In Progress
+      </button>
+      <button type="submit" name="status" value="cancelled" class="btn btn-danger btn-sm">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      {% elif appointment.status == 'in_progress' %}
+      <button type="submit" name="status" value="completed" class="btn btn-sm" style="background: var(--success); color: white;">
+        <i class="fas fa-check"></i> Mark Completed
+      </button>
+      {% endif %}
+    </form>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+    <!-- Patient Info -->
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary);">
+        <i class="fas fa-paw" style="color: var(--primary);"></i> Patient Details
+      </h3>
+      <div style="background: var(--bg-subtle); padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+        <div style="font-weight: 800; font-size: 1.15rem;">
+          <a href="{{ url_for('pet_details', id=appointment.pet_id) }}">{{ appointment.pet_name }}</a>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          {{ appointment.species }} &bull; {{ appointment.breed or 'Mixed' }}
+        </div>
+        {% if appointment.allergies %}
+        <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--danger); font-weight: 700;">
+          <i class="fas fa-exclamation-triangle"></i> Allergy: {{ appointment.allergies }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Owner Info -->
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary);">
+        <i class="fas fa-user" style="color: var(--secondary);"></i> Pet Parent
+      </h3>
+      <div style="background: var(--bg-subtle); padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+        <div style="font-weight: 800; font-size: 1.15rem;">
+          <a href="{{ url_for('owner_details', id=appointment.owner_id) }}">{{ appointment.owner_name }}</a>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          <i class="fas fa-phone-alt"></i> {{ appointment.owner_phone }}
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+          <i class="fas fa-envelope"></i> {{ appointment.owner_email or 'No email' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Doctor Info -->
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary);">
+        <i class="fas fa-user-md" style="color: var(--accent);"></i> Attending Doctor
+      </h3>
+      <div style="background: var(--bg-subtle); padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+        <div style="font-weight: 800; font-size: 1.15rem;">{{ appointment.doctor_name }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          {{ appointment.specialization }}
+        </div>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-top: 0.2rem;">
+          Standard Fee: ₹{{ "%.2f"|format(appointment.consultation_fee) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 2rem; padding: 1.5rem; border-radius: var(--border-radius-md); background: #ffffff; border: 1px solid var(--border-color);">
+    <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Reason for Consultation</h4>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">{{ appointment.reason }}</p>
+
+    {% if appointment.notes %}
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-muted);">
+      <strong>Clinic Notes:</strong> {{ appointment.notes }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

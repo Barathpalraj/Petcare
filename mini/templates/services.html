@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Our Veterinary Services & Specialties{% endblock %}
+
+{% block public_content %}
+<div class="section">
+  <div class="section-title-wrapper">
+    <span class="section-tag">Clinical Departments</span>
+    <h1 class="section-title">Specialized Veterinary Medicine</h1>
+    <p class="section-desc">State-of-the-art facilities and gentle protocols tailored for dogs, cats, birds, and exotic pets.</p>
+  </div>
+
+  <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+    <div class="feature-card">
+      <div class="icon-box"><i class="fas fa-heartbeat"></i></div>
+      <h3>Preventive & Wellness Exams</h3>
+      <p>Annual physical examinations, developmental puppy/kitten assessments, geriatric senior wellness checks, and personalized nutritional counseling.</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Full body palpation & vitals</li>
+        <li>Parasite screening & fecal floats</li>
+        <li>Microchipping & registration</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="icon-box" style="background: var(--secondary-light); color: var(--secondary);"><i class="fas fa-syringe"></i></div>
+      <h3>Vaccination & Immunology</h3>
+      <p>Core protective immunization protocols against Parvovirus, Distemper, Rabies, Feline Leukemia, and Bordetella.</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Personalized booster timelines</li>
+        <li>Titer level testing</li>
+        <li>Digital vaccination certificates</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="icon-box" style="background: #fee2e2; color: #ef4444;"><i class="fas fa-procedures"></i></div>
+      <h3>Surgical Suite & Anesthesia</h3>
+      <p>Sterile positive-pressure surgical theater equipped with multi-parameter vital monitors (ECG, pulse oximetry, capnography).</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Routine spay and neuter</li>
+        <li>Soft tissue & tumor excision</li>
+        <li>Orthopedic fracture fixation</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="icon-box" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-tooth"></i></div>
+      <h3>Veterinary Dentistry</h3>
+      <p>Periodontal health prevents systemic kidney and cardiac disease. Comprehensive dental cleanings and extractions performed safely under anesthesia.</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Ultrasonic subgingival scaling</li>
+        <li>High-speed polish & fluoride</li>
+        <li>Digital dental X-rays</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="icon-box" style="background: #fef3c7; color: #d97706;"><i class="fas fa-x-ray"></i></div>
+      <h3>Radiology & Imaging</h3>
+      <p>Immediate high-definition digital X-rays and color Doppler ultrasound to diagnose thoracic, cardiac, and abdominal abnormalities in minutes.</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Low radiation digital radiography</li>
+        <li>Abdominal ultrasound scans</li>
+        <li>Orthopedic hip dysplasia screenings</li>
+      </ul>
+    </div>
+
+    <div class="feature-card">
+      <div class="icon-box" style="background: #d1fae5; color: #059669;"><i class="fas fa-pills"></i></div>
+      <h3>Full-Service Pharmacy</h3>
+      <p>In-clinic dispensary providing fast access to prescription pharmaceuticals, specialty compounded liquids, and therapeutic diets.</p>
+      <ul style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); list-style: square; padding-left: 1.25rem;">
+        <li>Antibiotics & pain management</li>
+        <li>Flea, tick & heartworm treatments</li>
+        <li>Prescription diet foods</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

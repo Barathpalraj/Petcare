@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Clinic System Settings & Configuration{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-cog" style="color: var(--primary);"></i> Clinic System Settings</h1>
+    <p>Configure hospital operating parameters, contact details, invoices header, and database maintenance</p>
+  </div>
+</div>
+
+<div class="form-card" style="max-width: 800px;">
+  <form action="{{ url_for('settings') }}" method="POST" data-validate="true">
+    
+    <div class="form-section-title">
+      <i class="fas fa-hospital"></i> Practice Information
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Official Clinic / Hospital Name <span class="required">*</span></label>
+      <input type="text" name="clinic_name" value="{{ clinic_name }}" class="form-control" required>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Main Reception Phone <span class="required">*</span></label>
+        <input type="tel" name="clinic_phone" value="{{ clinic_phone }}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Clinic Contact Email <span class="required">*</span></label>
+        <input type="email" name="clinic_email" value="{{ clinic_email }}" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Physical Address</label>
+      <input type="text" name="clinic_address" value="{{ clinic_address }}" class="form-control">
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-database"></i> Database Engine & Environment
+    </div>
+
+    <div style="background: var(--bg-subtle); padding: 1.25rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+      <p><strong>Database:</strong> SQLite 3 (<code>database/pet_clinic.db</code>)</p>
+      <p><strong>Upload Directory:</strong> <code>uploads/pet_photos/</code></p>
+      <p><strong>Session Security:</strong> CSRF Protected &bull; Role-Based Authorization Engine</p>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-save"></i> Save Configuration
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

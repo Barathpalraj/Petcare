@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ owner.name }} - Client Profile & Pets{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-user-circle" style="color: var(--primary);"></i> Client: {{ owner.name }}</h1>
+    <p>Client ID #CL-{{ "%04d"|format(owner.id) }} &bull; Registered Member</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_pet', owner_id=owner.id) }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-paw"></i> Add Pet
+    </a>
+    <a href="{{ url_for('create_bill') }}?owner_id={{ owner.id }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-receipt"></i> Create Bill
+    </a>
+  </div>
+</div>
+
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Primary Phone</div>
+      <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">
+        <i class="fas fa-phone-alt" style="color: var(--primary);"></i> {{ owner.phone }}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Email Address</div>
+      <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">
+        {{ owner.email or 'None provided' }}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Emergency Contact</div>
+      <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">
+        {{ owner.emergency_contact or 'None' }}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Residence</div>
+      <div style="font-size: 0.95rem; color: var(--text-primary); margin-top: 0.2rem;">
+        {{ owner.address or '-' }} {{ owner.city or '' }}
+      </div>
+    </div>
+  </div>
+
+  {% if owner.notes %}
+  <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary);">
+    <strong>Account Notes:</strong> {{ owner.notes }}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Pets Registered Under This Owner -->
+<div class="dashboard-card" style="margin-bottom: 2rem;">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-dog" style="color: var(--primary);"></i> Pets Registered to {{ owner.name }}</h3>
+    <a href="{{ url_for('add_pet', owner_id=owner.id) }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Register Another Pet
+    </a>
+  </div>
+
+  {% if pets %}
+  <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for pet in pets %}
+    <div class="feature-card" style="padding: 1.5rem;">
+      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+        <div class="table-avatar" style="width: 50px; height: 50px; font-size: 1.5rem;">
+          {% if pet.species == 'Cat' %}<i class="fas fa-cat"></i>
+          {% elif pet.species == 'Bird' %}<i class="fas fa-dove"></i>
+          {% else %}<i class="fas fa-dog"></i>{% endif %}
+        </div>
+        <div>
+          <h4 style="font-size: 1.2rem; font-weight: 800;">{{ pet.name }}</h4>
+          <span class="badge badge-info">{{ pet.species }} - {{ pet.breed or 'Mixed' }}</span>
+        </div>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        <div><strong>Gender:</strong> {{ pet.gender }}</div>
+        <div><strong>Age:</strong> {{ pet.age_years }} years &bull; <strong>Weight:</strong> {{ pet.weight }} kg</div>
+        <div><strong>Microchip:</strong> <code>{{ pet.microchip_id or 'Unchipped' }}</code></div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{{ url_for('pet_details', id=pet.id) }}" class="btn btn-primary btn-sm" style="flex: 1;">
+          <i class="fas fa-notes-medical"></i> Medical Chart
+        </a>
+        <a href="{{ url_for('add_appointment', pet_id=pet.id) }}" class="btn btn-outline btn-sm" title="Book Appointment">
+          <i class="fas fa-calendar-plus"></i>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-paw"></i>
+    <h4>No Pets Registered</h4>
+    <p>This client does not have any animals attached to their profile.</p>
+    <a href="{{ url_for('add_pet', owner_id=owner.id) }}" class="btn btn-primary btn-sm">Register a Pet</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Billing Invoices History -->
+<div class="dashboard-card">
+  <div class="dashboard-card-header">
+    <h3><i class="fas fa-file-invoice" style="color: var(--secondary);"></i> Billing & Invoices</h3>
+  </div>
+
+  {% if invoices %}
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Patient</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><strong>{{ inv.invoice_number }}</strong></td>
+          <td>{{ inv.pet_name }}</td>
+          <td>{{ inv.invoice_date }}</td>
+          <td><strong>₹{{ "%.2f"|format(inv.total_amount) }}</strong></td>
+          <td><span class="badge badge-{{ inv.payment_status }}">{{ inv.payment_status }}</span></td>
+          <td>
+            <a href="{{ url_for('invoice_details', id=inv.id) }}" class="action-btn" title="View Invoice">
+              <i class="fas fa-receipt"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

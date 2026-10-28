@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Administer Vaccination | Pet Passport{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-syringe" style="color: var(--primary);"></i> Administer & Log Vaccine</h1>
+    <p>Record preventative immunizations and calculate automated booster due dates</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('vaccinations') }}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-arrow-left"></i> Back to Vaccinations
+    </a>
+  </div>
+</div>
+
+<div class="form-card">
+  <form action="{{ url_for('add_vaccination') }}" method="POST" data-validate="true">
+    
+    <div class="form-section-title">
+      <i class="fas fa-paw"></i> Patient Assignment
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group full-width">
+        <label class="form-label">Patient Pet <span class="required">*</span></label>
+        <select name="pet_id" class="form-control" required>
+          <option value="">-- Select Patient --</option>
+          {% for p in pets %}
+          <option value="{{ p.id }}" {% if request.args.get('pet_id') == p.id|string %}selected{% endif %}>
+            {{ p.name }} ({{ p.species }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">
+      <i class="fas fa-vial"></i> Vaccine Protocol
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Vaccine Type / Protocol <span class="required">*</span></label>
+        <select name="vaccine_name" id="vaccineNameSelect" class="form-control" required>
+          <option value="">-- Choose Vaccine --</option>
+          <option value="Rabies (1-Year)">Rabies (1-Year Core Booster)</option>
+          <option value="Rabies (3-Year)">Rabies (3-Year Core Booster)</option>
+          <option value="DHPP (Distemper, Hepatitis, Parvo, Parainfluenza)">DHPP 5-in-1 (Canine Core)</option>
+          <option value="FVRCP (Feline Viral Rhinotracheitis, Calicivirus, Panleukopenia)">FVRCP (Feline Core)</option>
+          <option value="Bordetella Bronchiseptica">Bordetella (Kennel Cough)</option>
+          <option value="Feline Leukemia Virus (FeLV)">Feline Leukemia Virus (FeLV)</option>
+          <option value="Lyme Borreliosis Vaccine">Lyme Disease Vaccine</option>
+          <option value="Canine Leptospirosis 4-Way">Leptospirosis 4-Way</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Manufacturer Batch / Lot Number</label>
+        <input type="text" name="batch_number" class="form-control" placeholder="e.g. B-9982-A">
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Date Administered <span class="required">*</span></label>
+        <input type="date" name="administered_date" id="administeredDateInput" value="{{ today_date }}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Next Booster Due Date <span class="required">*</span></label>
+        <input type="date" name="next_due_date" id="nextDueDateInput" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Administering Veterinarian</label>
+        <input type="text" name="veterinarian_name" value="{{ current_user.full_name }}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Compliance Status</label>
+        <select name="status" class="form-control">
+          <option value="up_to_date" selected>Up to Date</option>
+          <option value="due_soon">Due Soon</option>
+          <option value="overdue">Overdue</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Vaccination Site & Patient Reaction Notes</label>
+      <input type="text" name="notes" class="form-control" placeholder="e.g. Subcutaneous in right hind leg. No immediate allergic reaction observed.">
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('vaccinations') }}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-syringe"></i> Log Vaccine & Update Passport
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/vaccination.js') }}"></script>
+{% endblock %}

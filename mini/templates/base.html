@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ clinic_name }}{% endblock %} | Smart Pet Care</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Free CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+
+  <!-- Animation & Charts Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Flash Messages Toast Alerts -->
+  <div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-toast toast-{{ category }}">
+            <div class="toast-icon">
+              {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+              {% elif category == 'danger' or category == 'error' %}<i class="fas fa-exclamation-circle"></i>
+              {% elif category == 'warning' %}<i class="fas fa-exclamation-triangle"></i>
+              {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            <button class="toast-close" type="button"><i class="fas fa-times"></i></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  {% if current_user %}
+  <!-- ========================================================================= -->
+  <!-- Logged-In App Layout (Sidebar + Topbar + Main Shell)                      -->
+  <!-- ========================================================================= -->
+  <div class="app-layout">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <i class="fas fa-paw"></i>
+        </div>
+        <div class="sidebar-brand-text">
+          PawCare <span>Vet Clinic OS</span>
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="menu-category">Main</li>
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('dashboard_router') }}" class="sidebar-link {% if request.endpoint in ['admin_dashboard', 'doctor_dashboard', 'staff_dashboard'] %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('appointments') }}" class="sidebar-link {% if 'appointment' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-calendar-check"></i>
+            <span>Appointments</span>
+          </a>
+        </li>
+
+        <li class="menu-category">Patients & Clients</li>
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('pets') }}" class="sidebar-link {% if request.endpoint in ['pets', 'add_pet', 'pet_details', 'edit_pet'] %}active{% endif %}">
+            <i class="fas fa-dog"></i>
+            <span>Pets & Patients</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('owners') }}" class="sidebar-link {% if 'owner' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-user-friends"></i>
+            <span>Pet Owners</span>
+          </a>
+        </li>
+
+        <li class="menu-category">Clinical Operations</li>
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('consultation') }}" class="sidebar-link {% if request.endpoint == 'consultation' or request.endpoint == 'add_consultation' %}active{% endif %}">
+            <i class="fas fa-stethoscope"></i>
+            <span>Consultation</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('medical_records') }}" class="sidebar-link {% if request.endpoint == 'medical_records' %}active{% endif %}">
+            <i class="fas fa-notes-medical"></i>
+            <span>Medical Records</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('prescriptions') }}" class="sidebar-link {% if request.endpoint == 'prescriptions' %}active{% endif %}">
+            <i class="fas fa-file-prescription"></i>
+            <span>Prescriptions</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('vaccinations') }}" class="sidebar-link {% if 'vaccin' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-syringe"></i>
+            <span>Vaccinations</span>
+          </a>
+        </li>
+
+        <li class="menu-category">Pharmacy & Billing</li>
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('medicines') }}" class="sidebar-link {% if 'medicine' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-pills"></i>
+            <span>Medicines Stock</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('suppliers') }}" class="sidebar-link {% if request.endpoint == 'suppliers' %}active{% endif %}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Suppliers</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('bills') }}" class="sidebar-link {% if request.endpoint in ['bills', 'create_bill', 'invoice_details'] %}active{% endif %}">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Billing & Invoices</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('payments') }}" class="sidebar-link {% if request.endpoint == 'payments' %}active{% endif %}">
+            <i class="fas fa-credit-card"></i>
+            <span>Payments</span>
+          </a>
+        </li>
+
+        {% if current_user.role == 'admin' %}
+        <li class="menu-category">Administration</li>
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('doctors_manage') }}" class="sidebar-link {% if request.endpoint == 'doctors_manage' %}active{% endif %}">
+            <i class="fas fa-user-md"></i>
+            <span>Doctors Directory</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('staff_manage') }}" class="sidebar-link {% if request.endpoint == 'staff_manage' %}active{% endif %}">
+            <i class="fas fa-id-badge"></i>
+            <span>Staff Directory</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('users') }}" class="sidebar-link {% if request.endpoint == 'users' %}active{% endif %}">
+            <i class="fas fa-users-cog"></i>
+            <span>Users & Access</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('analytics') }}" class="sidebar-link {% if request.endpoint == 'analytics' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics & KPIs</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('reports') }}" class="sidebar-link {% if request.endpoint == 'reports' %}active{% endif %}">
+            <i class="fas fa-file-alt"></i>
+            <span>Reports</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a href="{{ url_for('settings') }}" class="sidebar-link {% if request.endpoint == 'settings' %}active{% endif %}">
+            <i class="fas fa-cog"></i>
+            <span>Clinic Settings</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+
+      <!-- Sidebar Footer / Current User Profile -->
+      <div class="sidebar-footer">
+        <div class="user-avatar-mini">
+          {{ current_user.full_name[:2].upper() }}
+        </div>
+        <div class="user-info-mini">
+          <div class="user-name-mini">{{ current_user.full_name }}</div>
+          <div class="user-role-mini">{{ current_user.role.title() }}</div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-icon-btn" title="Sign Out">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main App Container -->
+    <main class="app-main">
+      <!-- Topbar Header -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button type="button" class="mobile-toggle-btn" id="mobileSidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-bar-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search pets, clients, files..." class="table-search-input" data-table-id="dataTable">
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="{{ url_for('index') }}" class="quick-action-icon" title="View Public Website" target="_blank">
+            <i class="fas fa-globe"></i>
+          </a>
+          <a href="{{ url_for('notifications') }}" class="quick-action-icon" title="Notifications">
+            <i class="fas fa-bell"></i>
+            {% if unread_notifications_count > 0 %}
+              <span class="badge-dot"></span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('add_appointment') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Book Appt
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Injection Container -->
+      <div class="content-container">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  {% else %}
+  <!-- ========================================================================= -->
+  <!-- Public Layout (Header + Content + Footer)                                 -->
+  <!-- ========================================================================= -->
+  <header class="public-header">
+    <a href="{{ url_for('index') }}" class="brand-logo">
+      <i class="fas fa-paw"></i>
+      <span>PawCare Vet</span>
+    </a>
+
+    <ul class="public-nav-links">
+      <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+      <li><a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About Us</a></li>
+      <li><a href="{{ url_for('services') }}" class="{% if request.endpoint == 'services' %}active{% endif %}">Services</a></li>
+      <li><a href="{{ url_for('doctors') }}" class="{% if request.endpoint == 'doctors' %}active{% endif %}">Our Vets</a></li>
+      <li><a href="{{ url_for('public_pet_directory') }}" class="{% if request.endpoint == 'public_pet_directory' %}active{% endif %}">Our Patients</a></li>
+      <li><a href="{{ url_for('contact') }}" class="{% if request.endpoint == 'contact' %}active{% endif %}">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-lock"></i> Staff Portal
+      </a>
+    </div>
+  </header>
+
+  <main>
+    {% block public_content %}{% endblock %}
+  </main>
+
+  <footer class="public-footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="brand-logo" style="margin-bottom: 1rem; color: #fff;">
+          <i class="fas fa-paw"></i>
+          <span>PawCare Vet Clinic</span>
+        </div>
+        <p style="font-size: 0.9rem; line-height: 1.6; color: #94a3b8;">
+          Next-generation intelligent veterinary hospital management. Providing exceptional medical diagnostics, gentle surgery, and preventive wellness for furry companions.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Home</a></li>
+          <li><a href="{{ url_for('about') }}">About Us</a></li>
+          <li><a href="{{ url_for('services') }}">Clinical Services</a></li>
+          <li><a href="{{ url_for('doctors') }}">Veterinarians</a></li>
+          <li><a href="{{ url_for('contact') }}">Contact & Emergency</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="{{ url_for('services') }}">Preventive Care</a></li>
+          <li><a href="{{ url_for('services') }}">Internal Medicine</a></li>
+          <li><a href="{{ url_for('services') }}">Surgery & Dentistry</a></li>
+          <li><a href="{{ url_for('services') }}">Diagnostics & Radiology</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Clinic Hours & Contact</h4>
+        <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+          <i class="fas fa-clock" style="color: var(--primary); margin-right: 0.5rem;"></i> Mon - Sat: 8:00 AM - 8:00 PM
+        </p>
+        <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+          <i class="fas fa-phone-alt" style="color: var(--primary); margin-right: 0.5rem;"></i> {{ clinic_phone }}
+        </p>
+        <p style="font-size: 0.875rem; color: #94a3b8;">
+          <i class="fas fa-map-marker-alt" style="color: var(--primary); margin-right: 0.5rem;"></i> {{ clinic_address }}
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; {{ today_date[:4] }} {{ clinic_name }}. All rights reserved.</p>
+      <p>Powered by Smart Veterinary Operating System</p>
+    </div>
+  </footer>
+  {% endif %}
+
+  <!-- Core JavaScript Handlers -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/tilt_3d.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/three_3d.js') }}"></script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

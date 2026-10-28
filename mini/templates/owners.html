@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Pet Owners & Clients Directory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1><i class="fas fa-user-friends" style="color: var(--primary);"></i> Pet Owners & Clients</h1>
+    <p>Directory of registered pet parents, emergency contacts, and billing accounts</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('add_owner') }}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Register New Client
+    </a>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <form method="GET" action="{{ url_for('owners') }}" style="display: flex; gap: 1rem; align-items: center; flex: 1;">
+      <div class="table-search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search by client name, phone, email, city...">
+      </div>
+      {% if search %}
+      <a href="{{ url_for('owners') }}" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i> Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if owners %}
+  <div class="table-responsive">
+    <table class="custom-table" id="dataTable">
+      <thead>
+        <tr>
+          <th>Client Name</th>
+          <th>Phone</th>
+          <th>Email Address</th>
+          <th>City / Address</th>
+          <th>Registered Pets</th>
+          <th>Emergency Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in owners %}
+        <tr>
+          <td>
+            <div class="table-user-cell">
+              <div class="table-avatar"><i class="fas fa-user"></i></div>
+              <div class="table-user-info">
+                <a href="{{ url_for('owner_details', id=o.id) }}" class="name" style="color: var(--primary);">{{ o.name }}</a>
+                <span class="sub">Account #CL-{{ "%04d"|format(o.id) }}</span>
+              </div>
+            </div>
+          </td>
+          <td><strong>{{ o.phone }}</strong></td>
+          <td>{{ o.email or 'N/A' }}</td>
+          <td>{{ o.city or '-' }} <div style="font-size: 0.75rem; color: var(--text-muted);">{{ o.address or '' }}</div></td>
+          <td>
+            <span class="badge badge-info"><i class="fas fa-paw"></i> {{ o.pet_count }} Pets</span>
+          </td>
+          <td>{{ o.emergency_contact or 'None listed' }}</td>
+          <td>
+            <div class="table-actions">
+              <a href="{{ url_for('owner_details', id=o.id) }}" class="action-btn" title="View Client Account">
+                <i class="fas fa-folder-open"></i>
+              </a>
+              <a href="{{ url_for('add_pet', owner_id=o.id) }}" class="action-btn" title="Add Pet to Client">
+                <i class="fas fa-plus"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-user-friends"></i>
+    <h4>No Clients Found</h4>
+    <p>No pet owner records matched your query.</p>
+    <a href="{{ url_for('add_owner') }}" class="btn btn-primary btn-sm">Register New Client</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
